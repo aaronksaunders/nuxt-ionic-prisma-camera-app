@@ -39,6 +39,7 @@
 <script lang="ts" setup>
 import { Camera, CameraResultType, ImageOptions } from "@capacitor/camera";
 import { saveConfig } from "@ionic/core";
+import { alertController } from "@ionic/vue";
 import { ref } from "vue";
 import ImagePostInput from "./components/ImagePostInput.vue";
 
@@ -75,10 +76,29 @@ const pendingSave = ref(false);
 const API_URL = useRuntimeConfig().public.API_URL;
 
 // load the data
-const { data, pending, error, refresh } = await useAsyncData<ImagePostArray>(
-  "posts",
-  () => $fetch(`${API_URL}/getAllPosts`)
-);
+const {
+  data,
+  pending,
+  error: loadingError,
+  refresh,
+} = await useAsyncData<ImagePostArray>("posts", () => $fetch(`${API_URL}/getAllPosts`));
+
+/**
+ * Display an alert
+ */
+const doAlert = (options: { header: string; message: string }) => {
+  return alertController
+    .create({ buttons: ["OK"], ...options })
+    .then((alert) => alert.present());
+};
+
+// display error if necessary
+if (loadingError?.value) {
+  doAlert({
+    header: "Error Loading Data",
+    message: (loadingError?.value as Error)?.message,
+  });
+}
 
 /**
  *
@@ -87,6 +107,7 @@ const handleCreatePost = async () => {
   const image = await Camera.getPhoto({
     quality: 90,
     allowEditing: true,
+    correctOrientation: true,
     width: 600,
     resultType: CameraResultType.Base64,
   });
@@ -104,25 +125,27 @@ const handleInputSubmit = async ({ title, content }) => {
   showModal.value = false;
   pendingSave.value = true;
 
-  await useAsyncData<ImagePostArray>(
-    "newPost",
-    () =>
-      $fetch(`${API_URL}/createPost`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          title,
-          content,
-          image: imageURL.value,
-        }),
-      })
+  await useAsyncData<ImagePostArray>("newPost", () =>
+    $fetch(`${API_URL}/createPost`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        title,
+        content,
+        image: imageURL.value,
+      }),
+    })
   );
   imageURL.value = null;
   await refresh();
 
   pendingSave.value = false;
 
+  doAlert({
+    header: "Saving Image Post",
+    message: "Image saved successfully",
+  });
 };
 </script>
