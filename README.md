@@ -2,7 +2,7 @@
 
 - Look at the [nuxt 3 documentation](https://v3.nuxtjs.org) to learn more.
 - Look at the [Nuxt Ionic](https://ionic.roe.dev/) to learn more.
-- See associated video [Getting Started Building Mobile Apps With The Nuxt Ionic Module for Nuxt 3](https://www.youtube.com/watch?v=f4sB7NhCgRw)
+- See associated video [Using Nuxt-Ionic: Full Stack Mobile With Prisma SQLite & Ionic Framework w/ Capacitor](https://youtu.be/LpJMR-PlzYU)
 
 ## Description
 
